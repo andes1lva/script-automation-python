@@ -1,49 +1,31 @@
-# organizador.py
-import json, glob, os, pandas as pd
+import pandas as pd
+import json
+import os
+import re
 
-BRUTOS = "dados_brutos"
-ORGANIZADOS = "dados_organizados"
-os.makedirs(ORGANIZADOS, exist_ok=True)
-
-def safe_get(d, key, default="N/A"):
-    return d.get(key, default)
-
-arquivos = sorted(glob.glob(f"{BRUTOS}/log_*.json"))
-if not arquivos:
-    print("[ERRO] Nenhum JSON encontrado!")
+# CARREGA DADOS
+json_path = "dados_brutos/produtos_brutos.json"
+if not os.path.exists(json_path):
+    print("Nenhum arquivo JSON encontrado! Rode o scraper primeiro.")
     exit()
 
-dados = []
-for arq in arquivos:
-    try:
-        with open(arq, 'r', encoding='utf-8') as f:
-            d = json.load(f)
-        linha = {
-            'Tipo do Produto': safe_get(d, 'tipo_produto'),
-            'Nome do Produto': safe_get(d, 'nome_produto'),
-            'Preço': safe_get(d, 'preco'),
-            'Vendas Semanal': safe_get(d, 'vendas_semanal'),
-            'Vendas Mensal': safe_get(d, 'vendas_mensal'),
-            'Vendas Anual': safe_get(d, 'vendas_anual'),
-            'Fabricante': safe_get(d, 'fabricante'),
-            'Modelo': safe_get(d, 'modelo'),
-            'Marca': safe_get(d, 'marca'),
-            'Link Direto': safe_get(d, 'link_direto'),
-            'Imagem Principal': safe_get(d, 'imagens', [])[:1] or "N/A",
-            'Meta Descrição': safe_get(d, 'meta_descricao')
-        }
-        dados.append(linha)
-    except Exception as e:
-        print(f"[ERRO AO LER] {arq} → {e}")
+with open(json_path, "r", encoding="utf-8") as f:
+    dados = json.load(f)
 
-df = pd.DataFrame(dados).fillna('N/A')
-excel_path = f"{ORGANIZADOS}/produtos_organizados.xlsx"
+# CRIA DATAFRAME
+df = pd.DataFrame(dados)
 
-with pd.ExcelWriter(excel_path, engine='openpyxl') as writer:
-    df.to_excel(writer, index=False, sheet_name='Produtos')
-    ws = writer.sheets['Produtos']
-    for col in ws.columns:
-        max_l = max(len(str(cell.value)) for cell in col)
-        ws.column_dimensions[col[0].column_letter].width = min(max_l + 2, 50)
+# LIMPEZA
+df["preco"] = df["preco"].str.replace(r"[^\d,]", "", regex=True).str.replace(",", ".").str.strip()
+df["preco"] = pd.to_numeric(df["preco"], errors='coerce').fillna("N/A")
 
-print(f"[OK] Excel gerado: {excel_path} ({len(df)} produtos)")
+# ORDENA POR PREÇO
+df = df.sort_values(by="preco")
+
+# SALVA EXCEL
+os.makedirs("dados_organizados", exist_ok=True)
+output_path = "dados_organizados/produtos_organizados.xlsx"
+df.to_excel(output_path, index=False, sheet_name="Produtos")
+
+print(f"Excel gerado com {len(df)} produtos em {output_path}")
+print("Colunas: Nome, Preço, URL, Imagem, Site, Tipo, Marca")

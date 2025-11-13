@@ -1,6 +1,3 @@
-[INFO] 1 URLs
-
-[COLETANDO] https://www.terabyteshop.com.br/?p=1466689&utm_source=indoleads&utm_medium=banner&utm_campaing=61a733e9d915b8594b4234ad&clickid_indoleads=0d00b615-a0b8-444a-9b4c-858d52981e89&gad_source=1
-[OK] log_20251113_000010.json | Pre�o: N�o encontrado | Tipo: Mem�ria RAM
-
-[CONCLU�DO]
+Coletando de https://artsviking.com.br/?srsltid=AfmBOooTE9Qdg_7yPkVL8rkJga6iNYIGdHZrurApttjuwyQMhKUYxcag
+0 produtos coletados de artsviking.com.br
+Total: 0 produtos coletados e salvos em dados_brutos/produtos_brutos.json
