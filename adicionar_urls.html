@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scraper Pro</title>
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <img src="assets/logo.png" class="logo pulse">
+            <h1 class="glow">SCRAPER PRO</h1>
+            <p class="subtitle">Coletor Inteligente</p>
+        </header>
+
+        <main class="main">
+            <div class="card glass">
+                <h2 class="title">Adicionar URLs</h2>
+                <p class="info">Cole suas URLs aqui:</p>
+                
+                <textarea id="urls" class="input-glow" placeholder="https://..."></textarea>
+
+                <div class="actions">
+                    <button id="download" class="btn-neon">
+                        <i class="fas fa-download"></i> Baixar urls.txt e Abrir Pasta
+                    </button>
+                </div>
+
+                <div id="status" class="status-neon"></div>
+                <img src="assets/loading.gif" id="loading" class="loading" style="display:none;">
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.getElementById('download').addEventListener('click', function() {
+            const urls = document.getElementById('urls').value.trim();
+            if (!urls) {
+                document.getElementById('status').textContent = 'Adicione URLs!';
+                document.getElementById('status').className = 'status-neon error';
+                document.getElementById('status').style.display = 'block';
+                setTimeout(() => document.getElementById('status').style.display = 'none', 4000);
+                return;
+            }
+
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('status').textContent = 'Baixando...';
+            document.getElementById('status').className = 'status-neon success';
+            document.getElementById('status').style.display = 'block';
+
+            // DOWNLOAD FORÇADO
+            const blob = new Blob([urls], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'urls.txt';
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            // ABRE PASTA
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('status').textContent = 'Baixado! Pasta aberta.';
+                const folder = location.pathname.replace(/[^/]+$/, '');
+                window.open('file:///' + folder, '_blank');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
